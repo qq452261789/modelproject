@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html ng-app="wsscat">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=no">
+		<title></title>
+	</head>
+
+	<link rel="stylesheet" type="text/css" href="dist/css/base.css" />
+	<!--angular框架-->
+	<script type="text/javascript" src="dist/js/angular.js"></script>
+	<!--angular路由支持文件-->
+	<script type="text/javascript" src="dist/js/angular-route.js"></script>
+
+	<body>
+		<header id="header">日日头条</header>
+		<aside>
+			<p id="nav">
+				<!--ng-class="isNavRed1?'isNavRed':''"-->
+				<a ng-href="#/index" class="isNavRed"><span>推荐</span></a>
+				<a ng-href="#/game"><span>游戏</span></a>
+				<span>热点</span>
+				<span>社会</span>
+			</p>
+			<isnavred></isnavred>
+		</aside>
+		<!--渲染视图-->
+		<div ng-view=""></div>
+	</body>
+	<script>
+		var app = angular.module('wsscat', ['ngRoute']);
+		app.config(function($routeProvider) {
+				$routeProvider.when('/index', {
+						controller: 'indexCtrl',
+						templateUrl: 'view/index.html'
+					}).when('/game', {
+						controller: 'gameCtrl',
+						templateUrl: 'view/game.html'
+					}).when('/game/:id', {
+						controller: 'gameDatailCtrl',
+						templateUrl: 'view/gameDatail.html'
+					})
+					//如果找不到对应的路由那就跳到index模版文件
+					.otherwise({
+						redirectTo: '/index'
+					})
+			})
+			//定义了一个主页控制器
+		app.controller('indexCtrl', ['$rootScope', '$scope', '$http', function($rootScope, $scope, $http) {
+			//http://10.16.151.25/news/baiduApi2.php?num=10&page=1
+			//开始显示的条数
+			$scope.offset = 5;
+			//这个是刚进入页面时候，数据没请求回来前出现一个loading
+			$scope.loading = true;
+			var loadMoreData = function() {
+				$http.get('baiduApi2.php', {
+						params: {
+							num: $scope.offset,
+							page: '1',
+						}
+					})
+					/*$http({
+						method:'get',
+						url:'http://10.16.151.25/news/baiduApi2.php',
+						params:{
+							num:10,
+						}
+					})*/
+					.success(function(data) {
+						//这个是请求完数据之后让loading消失
+						$scope.loading = false;
+						console.log(data);
+						$scope.news = data.newslist;
+						console.log($scope.news);
+					})
+			}
+
+			loadMoreData($scope.offset);
+			$scope.loadMore = function() {
+				$scope.loading = true;
+				//自定义偏移量（点击查看更多增加的条数）
+				$scope.offset += 5;
+				//$scope.offset++;
+				loadMoreData($scope.offset);
+			}
+		}]);
+		app.directive('isnavred', [function() {
+			return {
+				restrict: 'EA', //标签和属性的写法激活此组件
+				link: function(scope, element, attrs) {
+					var nav = document.getElementById('nav')
+					var navs = nav.getElementsByTagName('a')
+					console.log(angular);
+					angular.element(navs).on('click', function() {
+						//做全局的清楚
+						angular.element(navs).removeClass('isNavRed');
+						angular.element(this).addClass('isNavRed');
+					})
+				}
+			}
+		}]);
+
+		app.controller('gameCtrl', ['$routeParams', '$rootScope', '$scope', '$http', function($routeParams, $rootScope, $scope, $http) {
+			//http://10.16.151.25/news/baiduApi2.php?num=10&page=1
+			//开始显示的条数
+			//这个是刚进入页面时候，数据没请求回来前出现一个loading
+			$scope.loading = true;
+			var loadMoreData = function() {
+				alert(1)
+				$http.get('baiduApi3.php', {
+						params: {
+							num: $scope.offset,
+							page: '1',
+							channelId: '5572a109b3cdc86cf39001db',
+						}
+					})
+					.success(function(data) {
+						//这个是请求完数据之后让loading消失
+						$scope.loading = false;
+						console.log(data);
+						$scope.news = data.showapi_res_body.pagebean.contentlist;
+
+					})
+			}
+
+			loadMoreData($scope.offset);
+			$scope.loadMore = function() {
+				$scope.loading = true;
+				//自定义偏移量（点击查看更多增加的条数）
+				$scope.offset += 5;
+				//$scope.offset++;
+				loadMoreData($scope.offset);
+			}
+		}]);
+		app.controller('gameDatailCtrl', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
+			$http({
+				method: 'get',
+				url: 'baiduApi3.php',
+				params: {
+					channelId: '5572a109b3cdc86cf39001db',
+				},
+			}).success(function(data) {
+				console.log(data);
+				$scope.new = data.showapi_res_body.pagebean.contentlist[$routeParams.id];
+			})
+		}]);
+		app.directive('isnavred', ['$location', function($location) {
+			return {
+				restrict: 'EA', //标签和属性的写法激活此组件
+				replace: true,
+				transclude: true,
+				//				template: '<p id="nav">' +
+				//					'<a ng-href="#/index" class="isNavRed"><span>推荐</span></a>' +
+				//					'<a ng-href="#/game"><span>游戏</span></a>' +
+				//					'<span>热点</span>' +
+				//					'<span>社会</span>' +
+				//					'</p>',
+				link: function(scope, element, attrs) {
+					console.log(location.hash);
+					var nav = document.getElementById('nav')
+					var navs = nav.getElementsByTagName('a')
+					console.log(angular);
+					angular.element(navs).on('click', function() {
+						//做全局的清楚
+						angular.element(navs).removeClass('isNavRed');
+						angular.element(this).addClass('isNavRed');
+					})
+				}
+			}
+		}])
+	</script>
+
+</html>
