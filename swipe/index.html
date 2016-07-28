@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=no">
+		<title></title>
+		<style type="text/css">
+			* {
+				padding: 0;
+				margin: 0;
+			}
+			
+			body {
+				width: 100%;
+			}
+			
+			.hide {
+				display: none;
+			}
+			
+			.page {
+				width: 100%;
+				height: 100%;
+				position: absolute;
+				font-size: 100%;
+				text-align: center;
+				color: red;
+			}
+			
+			.page_1_1 {
+				background: url(img/1.jpg) no-repeat;
+				background-size: cover;
+			}
+			
+			.page_2_1 {
+				background: url(img/2.jpg) no-repeat;
+				background-size: cover;
+			}
+			
+			.page_3_1 {
+				background: url(img/3.jpg) no-repeat;
+				background-size: cover;
+			}
+			
+			@-ms-keyframes moveTop {
+				from {}
+				to {
+					transform: translate(-100%);
+				}
+			}
+			
+			@keyframes moveTobottom {
+				from {
+					transform: translateY(100%);
+				}
+			}
+			
+			.top {
+				animation: moveTop .6s ease;
+			}
+			
+			.bottom {
+				animation: moveTobottom .6s ease ;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="page  page_1_1 top page-current  ">123</div>
+		<div class="page  page_2_1  page_current hide">456</div>
+		<div class="page  page_3_1 page_current hide">789</div>
+		
+	</body>
+	<script type="text/javascript">
+		window.onload = function() {
+			(function() {
+				//现在是第一行第一列
+				var now = {
+						row: 1,
+						col: 1
+					}
+					//下一张的行列
+				var last = {
+						row: 0,
+						col: 0
+					}
+					//定义方向
+				var towards = {
+					up: 1,
+					right: 2,
+					dowm: 3,
+					left: 4
+				}
+				var inAnimateing = false;
+				var touch = {}
+				//var Xstar, Ystar, Xend, Yend
+				document.getElementsByTagName('body')[0].addEventListener('touchstart', function(e) {
+					//console.log(e);
+					touch.Xstar = e.targetTouches[0].pageX;
+					touch.Ystar = e.targetTouches[0].pageY;
+				});
+				document.getElementsByTagName('body')[0].addEventListener('touchend', function(e) {
+					//console.log(e);
+					touch.Xend = e.changedTouches[0].pageX;
+					touch.Yend = e.changedTouches[0].pageY;
+					var listendireation = direation(touch.Xstar, touch.Ystar, touch.Xend, touch.Yend)
+					if(listendireation == 'top') {
+						alert('top');
+						last.row = now.row;
+						last.col = now.col;
+
+						now.row = last.row + 1
+						now.col = 1;
+						console.log(now);
+						pageMove(towards.up);
+					}
+				})
+
+				function hasClass(obj, cls) {
+					return obj.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'));
+				}
+
+				function addClass(obj, cls) {
+					if(!hasClass(obj, cls)) obj.className += " " + cls;
+				}
+
+				function removeClass(obj, cls) {
+					if(hasClass(obj, cls)) {
+						var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');
+						obj.className = obj.className.replace(reg, ' ');
+					}
+				}
+
+				function toggleClass(obj, cls) {
+					if(hasClass(obj, cls)) {
+						removeClass(obj, cls);
+					} else {
+						addClass(obj, cls);
+					}
+				}
+				function pageMove(tw) {
+					inAnimateing = true;
+					//将要跳转到的当前页面
+					var lastPage = '.page_' + last.row + '_' + last.col;
+					console.log(lastPage);
+					//上一个页面 
+					var nowPage = '.page_' + now.row + '_' + now.col;
+					switch(tw) {
+						//addclass
+						case towards.up:
+							outClass = 'top';
+							inClass = 'bottom';
+							break;
+					}
+				
+					//第二页
+					var $nowPage = document.querySelector(nowPage);
+					console.log($nowPage);
+					//第一页
+					var $lastPage = document.querySelector(lastPage);
+					//滑动时候下一页出现
+					removeClass = ($nowPage, 'hide');
+					addcClass = ($lastPage, outClass);
+					addcClass = ($nowPage,outClass);
+					//动画完成后
+					setTimeout(function(){
+						removeClass($lastPage, 'page-current');
+						addClass($nowPage, 'page-current');
+						removeClass($lastPage, outClass);
+						removeClass($nowPage, inClass);
+						addClass($lastPage, "hide");
+						inAnimateing = false;
+					},600)
+					
+				}
+				function direation(Xstar, Ystar, Xend, Yend) {					
+					return Math.abs(Xstar - Xend) >= Math.abs(Ystar - Yend) ? (Xstar >= Xend ? 'left' : 'right') : (Ystar > Yend ? 'top' : 'bottom')
+				}
+			})()
+		}
+	</script>
+
+</html>
